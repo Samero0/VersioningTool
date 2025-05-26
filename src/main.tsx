@@ -1,5 +1,5 @@
 import './index.css'
-import './styles/imt-styles.css';
+import './styles/company-styles.css';
 
 import App from './App'
 import { StrictMode } from 'react'

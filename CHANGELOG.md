@@ -1,4 +1,14 @@
-### Teno Versioning Tool changelog
+### Versioning Tool changelog
+
+# 3.0.0
+
+> 26 May 2025
+
+Refactor:
+
+- Company elements and references deleted
+- api functions deleted
+- database integration deleted
 
 # 2.0.1
 

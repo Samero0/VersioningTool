@@ -1,21 +1,17 @@
+// pages/Home.tsx
 import {
-HomeAppContainer,
-List,
-ListItem,
-Paragraph,
-Subtitle,
-TextWrapper,
-Title
+  HomeAppContainer,
+  List,
+  ListItem,
+  Paragraph,
+  Subtitle,
+  TextWrapper,
+  Title
 } from "../styles/styles";
 
 import TextBox from "../components/Textbox";
-import { useReleaseNotes } from "../hooks/useReleaseNotes";
 
 const Home = () => {
-
-  const { releaseNotes } = useReleaseNotes();
-
-  console.log(releaseNotes)
   return (
     <HomeAppContainer>
       <TextWrapper>
@@ -42,7 +38,6 @@ const Home = () => {
           </ListItem>
         </List>
 
-        
         <Subtitle>Portal Updates:</Subtitle>
         <TextBox
           id="textBox_code"
@@ -52,7 +47,7 @@ const Home = () => {
         <Subtitle>Release Notes:</Subtitle>
         <TextBox
           id="textBox_code"
-          value='[{"version":"X.Y.Z", "date":"DD/MM/YYY", "content":HTML}]'
+          value='[{"version":"X.Y.Z", "date":"DD/MM/YYYY", "content":HTML}]'
           size='small'
         />
       </TextWrapper>

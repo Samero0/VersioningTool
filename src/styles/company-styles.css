@@ -1,0 +1,49 @@
+/*this is only for the livePreview*/
+.html-title {
+    color: #3D74B4;
+    font-family: "Noto Sans Display";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: uppercase;
+  }
+  
+  .html-list {
+    margin-top: 8px;
+    margin-bottom: 24px;
+    list-style: inside;
+    list-style-type: auto;
+    font-size: 16px;
+    color: #383838;
+  }
+  
+  .html-list ol,
+  .html-list ul {
+    margin-left: 16px;
+    padding-left: 16px;
+  }
+  
+  .html-list ol {
+    list-style-type: decimal;
+    margin-left: 16px;
+    padding-left: 16px;
+  }
+    
+  .html-list ol[type="a"] {
+    list-style-type: lower-alpha; 
+  }
+    
+  .html-list ol[type="i"] {
+    list-style-type: lower-roman;
+  }
+  
+  .html-list ol[type="1"] {
+    list-style-type: decimal !important;
+  }
+    
+  .html-list ul {
+    list-style-type: disc; 
+    margin-left: 16px;
+    padding-left: 16px;
+  }

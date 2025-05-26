@@ -1,24 +1,15 @@
-import { Link } from "react-router-dom";
 import React from "react";
-import { SingleSelectionDropdown } from 'teno-dropdown-component';
+import { Link } from "react-router-dom";
 import { styled } from "styled-components";
 
 interface NavBarProps {
   links: LinkProps[];
-  dropdownProps: React.ComponentProps<typeof SingleSelectionDropdown>;
-  dropdownDBProps: React.ComponentProps<typeof SingleSelectionDropdown>;
 }
 
 interface LinkProps {
   to: string;
   text: string;
 }
-
-const RightContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
 
 const NavContainer = styled.nav`
   background-color: #3d74b4;
@@ -39,28 +30,21 @@ const StyledLink = styled(Link)`
   text-decoration: none;
 
   &:hover {
-      text-decoration: underline;
+    text-decoration: underline;
   }
 `;
 
-const NavBar: React.FC<NavBarProps> = ({ links, dropdownProps, dropdownDBProps }) => {
+const NavBar: React.FC<NavBarProps> = ({ links }) => {
   return (
-
-  <NavContainer>
-    <NavLinks>
-      {links.map((link, index) => (
-        <StyledLink key={index} to={link.to}>
-          {link.text}
-        </StyledLink>
-      ))}
-    </NavLinks>
-    <RightContainer>
-      <SingleSelectionDropdown {...dropdownProps} />
-      <SingleSelectionDropdown {...dropdownDBProps} />
-    </RightContainer>
-  </NavContainer>
-
-
+    <NavContainer>
+      <NavLinks>
+        {links.map((link, index) => (
+          <StyledLink key={index} to={link.to}>
+            {link.text}
+          </StyledLink>
+        ))}
+      </NavLinks>
+    </NavContainer>
   );
 };
 

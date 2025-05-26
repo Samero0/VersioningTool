@@ -1,7 +1,8 @@
+// hooks/useAuthToken.ts
 import { useCallback, useEffect, useState } from 'react';
 
 import { API_URL } from '../constants';
-import { TenoSessionService } from 'teno-session-service';
+// import { TenoSessionService } from 'teno-session-service';
 
 export const useAuthToken = () => {
     const [token, setToken] = useState<string | null>(null);

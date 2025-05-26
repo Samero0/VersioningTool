@@ -1,3 +1,4 @@
+//hooks/sessionToken.ts
 import { TOKEN_KEY } from "../constants";
 
 export const sessionToken = {

@@ -1,8 +1,9 @@
+// hooks/useReleaseNotes.ts
 import { API_BASE_URL, ENV_API_URLS } from '../constants';
 import { useCallback, useEffect, useState } from 'react';
 
 import StateDatas from '../api/StateDatas';
-import { TenoSessionService } from 'teno-session-service';
+// import { TenoSessionService } from 'teno-session-service';
 import axios from 'axios';
 import { cleanContent } from './contentCleaner';
 

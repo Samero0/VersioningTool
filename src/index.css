@@ -1,5 +1,5 @@
 html, body, #root {
-    font-family: var(--font-product-font-family, "Noto Sans Display");  
+    font-family: "Noto Sans Display";  
     margin:0;
     padding:0;
 }
