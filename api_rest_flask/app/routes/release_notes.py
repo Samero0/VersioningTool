@@ -39,23 +39,36 @@ def get_latest_release_note():
 
 @bp.route("/", methods=["PUT"])
 def update_latest_release_note():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        print("[PUT /release-notes/] Payload recibido:", data)
 
-    # Buscar el último release note por fecha
-    latest_note = ReleaseNote.query.order_by(ReleaseNote.date.desc()).first()
-    if not latest_note:
-        return jsonify({"error": "No release note found"}), 404
+        latest_note = ReleaseNote.query.order_by(ReleaseNote.date.desc()).first()
+        if not latest_note:
+            print("❌ No se encontró ningún release note.")
+            return jsonify({"error": "No release note found"}), 404
 
-    # Actualizar solo los campos que vienen en el payload
-    if "version" in data:
-        latest_note.version = data["version"]
-    if "date" in data:
-        # Para evitar el error de formato, recortamos la fecha a YYYY-MM-DD
-        date_str = data["date"]
-        latest_note.date = datetime.strptime(date_str[:10], "%Y-%m-%d")
-    if "content" in data:
-        latest_note.content = data["content"]
+        if "version" in data:
+            print("🔧 Actualizando versión:", data["version"])
+            latest_note.version = data["version"]
+        if "date" in data:
+            try:
+                date_str = data["date"]
+                print("📅 Parseando fecha:", date_str)
+                latest_note.date = datetime.strptime(date_str[:10], "%Y-%m-%d")
+            except Exception as date_err:
+                print("❌ Error al parsear fecha:", date_str, "→", date_err)
+                return jsonify({"error": "Invalid date format"}), 400
+        if "content" in data:
+            print("📝 Actualizando contenido")
+            latest_note.content = data["content"]
 
-    db.session.commit()
-    return jsonify({"message": "Release note updated"}), 200
+        db.session.commit()
+        print("✅ Release note actualizado correctamente.")
+        return jsonify({"message": "Release note updated"}), 200
+    except Exception as e:
+        import traceback
+        print("🔥 Excepción en PUT /release-notes/:")
+        print(traceback.format_exc())
+        return jsonify({"error": "Internal Server Error"}), 500
 

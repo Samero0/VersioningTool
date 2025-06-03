@@ -14,6 +14,8 @@ import {
 } from '../styles/styles.tsx';
 import { useEffect, useState } from 'react';
 
+import { useReleaseAndPortalUpdates } from '../hooks/useReleaseAndPortalUpdates';
+
 import Button from '../components/Button.tsx';
 import Clickableimg from '../components/ClickableImg.tsx';
 import CustomDatePicker from '../components/DatePicker.tsx';
@@ -43,6 +45,8 @@ export const ReleaseNotes = () => {
   });
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  const { syncToBackend, syncFromBackend } = useReleaseAndPortalUpdates();
+
   // handlers
   const handleEditorChange = (newValue: string) => {
     setContent(newValue);
@@ -54,11 +58,10 @@ export const ReleaseNotes = () => {
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setDataDate(date);
-      localStorage.setItem('ReleaseNotesDate', date.toString());
+      localStorage.setItem('ReleaseNotesDate', date.toISOString());
     }
   };
 
-  // generates the json code for Release Notes and saves it to localStorage
   const generateCode = (startDate: Date | null, inputVersion: string, inputContent: string) => {
     const inputContentCleaned = cleanContent(inputContent);
     const formattedContent = formatHtml(inputContentCleaned);
@@ -78,28 +81,12 @@ export const ReleaseNotes = () => {
     const dateString = formatDate(startDate);
     const code = codeGenerator(dateString!, inputVersion, inputContentCleaned)();
     setCodeValue(code);
-    saveCode(code);
-  };
-
-  const saveCode = (code: string) => {
     localStorage.setItem("ReleaseNotesCode", code);
   };
 
   useEffect(() => {
-    const v = localStorage.getItem('ReleaseNotesVersion');
-    const d = localStorage.getItem('ReleaseNotesDate');
-    const c = localStorage.getItem('ReleaseNotesContent');
-    const savedCode = localStorage.getItem('ReleaseNotesCode');
-
-    if (v) setVersion(v);
-    if (d) setDataDate(new Date(d));
-    if (c) {
-      const cleaned = cleanContent(c);
-      const formatted = formatHtml(cleaned);
-      setContent(formatted);
-    }
-    if (savedCode) setCodeValue(savedCode);
-  }, []);
+    syncFromBackend(); // carga inicial desde el backend
+  }, [syncFromBackend]);
 
   return (
     <AppContainer>
@@ -198,7 +185,18 @@ export const ReleaseNotes = () => {
                       <InputWrapper>
                         <Button 
                           id="send_button"
-                          onClick={() => console.log('Sending to backend...')}
+                          onClick={() => {
+                            if (!localStorage.getItem("ReleaseNotesCode") || !localStorage.getItem("PortalUpdatesCode")) {
+                              alert("Generate both release notes and portal updates before sending.");
+                              return;
+                            }
+                            
+                            localStorage.setItem('ReleaseNotesContent', content);
+                            localStorage.setItem('ReleaseNotesVersion', version);
+                            localStorage.setItem('ReleaseNotesDate', formatDate(dataDate)!);
+
+                            syncToBackend();
+                          }}
                           text="Send"
                         />
                         <Button 

@@ -22,34 +22,10 @@ import clipBoardIcon from '../assets/clipBoard.svg';
 import { copyToClipboard } from '../hooks/useClipboard.ts';
 import { formatDate } from '../hooks/formatDate.ts';
 import { validateVersion } from '../validators/validateVersion.ts';
+import { useReleaseAndPortalUpdates } from '../hooks/useReleaseAndPortalUpdates';
 
 export const PortalUpdates = () => {
-  // generates the json code for Portal Updates
-  // and saves it to localStorage
-  const generateCode = (startDate: Date | null, nextDate: Date | null, inputVersion: string) => {
-    if (!validateVersion(inputVersion)) {
-      alert('Invalid version format. Please use the format X.Y.Z or X.Y (e.g., 1.0.0)');
-      return;
-    }
-
-    const startDateFormated = formatDate(startDate);
-    const nextDateFormated = formatDate(nextDate);
-    if (!startDateFormated || !nextDateFormated) return;
-
-    const [startDay, startMonth, startYear] = startDateFormated.split('/');
-    const updatedAt = `${startYear}-${startMonth}-${startDay}T00:00:00`;
-
-    const [nextDay, nextMonth, nextYear] = nextDateFormated.split('/');
-    const nextScheduledUpdate = `${nextYear}-${nextMonth}-${nextDay}T00:00:00`;
-
-    const code = `{ \\"version\\": \\"${inputVersion}\\", \\"updatedAt\\": \\"${updatedAt}\\", \\"nextScheduledUpdate\\": \\"${nextScheduledUpdate}\\", \\"enabled\\": ${enabled} }`;
-    setCodeValue(code);
-    saveCode(code);
-  };
-
-  const saveCode = (code: string) => {
-    localStorage.setItem("PortalUpdatesCode", code);
-  };
+  const { syncFromBackend } = useReleaseAndPortalUpdates();
 
   const [code, setCodeValue] = useState<string>('');
   const [version, setVersion] = useState(localStorage.getItem('PortalUpdatesVersion') || '');
@@ -68,28 +44,48 @@ export const PortalUpdates = () => {
   const handleUpdateAt = (date: Date | null) => {
     if (date) {
       setUpdateAt(date);
-      localStorage.setItem("PortalUpdatesUpdatedAt", date.toString());
+      localStorage.setItem("PortalUpdatesUpdatedAt", date.toISOString());
     }
   };
 
   const handleNextScheduledUpdate = (date: Date | null) => {
     if (date) {
       setNextScheduledUpdate(date);
-      localStorage.setItem('PortalUpdatesNextScheduledUpdate', date.toString());
+      localStorage.setItem('PortalUpdatesNextScheduledUpdate', date.toISOString());
     }
   };
 
-  useEffect(() => {
-    const v = localStorage.getItem("PortalUpdatesVersion");
-    const upA = localStorage.getItem("PortalUpdatesUpdatedAt");
-    const nSU = localStorage.getItem("PortalUpdatesNextScheduledUpdate");
-    const savedCode = localStorage.getItem("PortalUpdatesCode");
+  const generateCode = (
+    startDate: Date | null,
+    nextDate: Date | null,
+    inputVersion: string
+  ) => {
+    if (!validateVersion(inputVersion)) {
+      alert('Invalid version format. Please use the format X.Y.Z or X.Y (e.g., 1.0.0)');
+      return;
+    }
 
-    if (v) setVersion(v);
-    if (upA) setUpdateAt(new Date(upA));
-    if (nSU) setNextScheduledUpdate(new Date(nSU));
-    if (savedCode) setCodeValue(savedCode);
-  }, []);
+    const startDateFormatted = formatDate(startDate);
+    const nextDateFormatted = formatDate(nextDate);
+    if (!startDateFormatted || !nextDateFormatted) return;
+    
+    const updatedAt = `${startDateFormatted}T00:00:00`;
+    const nextScheduledUpdate = `${nextDateFormatted}T00:00:00`;
+
+    const generatedCode = JSON.stringify({
+      version: inputVersion,
+      updatedAt,
+      nextScheduledUpdate,
+      enabled
+    });
+
+    setCodeValue(generatedCode);
+    localStorage.setItem("PortalUpdatesCode", generatedCode);
+  };
+
+  useEffect(() => {
+    syncFromBackend();
+  }, [syncFromBackend]);
 
   return (
     <AppContainer>
@@ -104,8 +100,9 @@ export const PortalUpdates = () => {
                 placeholder="X.Y.Z"
                 value={version}
                 onChange={(e) => {
-                  setVersion(e.target.value);
-                  localStorage.setItem('PortalUpdatesVersion', e.target.value);
+                  const value = e.target.value;
+                  setVersion(value);
+                  localStorage.setItem('PortalUpdatesVersion', value);
                 }}
               />
             </InputWrapper>
@@ -131,8 +128,9 @@ export const PortalUpdates = () => {
                 checked={enabled}
                 value="Banner enabled"
                 onChange={() => {
-                  setEnabled(!enabled);
-                  localStorage.setItem('PortalUpdatesEnabled', String(!enabled));
+                  const newValue = !enabled;
+                  setEnabled(newValue);
+                  localStorage.setItem('PortalUpdatesEnabled', String(newValue));
                 }}
               />
             </InputWrapper>
@@ -143,7 +141,9 @@ export const PortalUpdates = () => {
             <InputWrapper>
               <Button
                 id="button_generate"
-                onClick={() => generateCode(updateAt, nextScheduledUpdate, version)}
+                onClick={() =>
+                  generateCode(updateAt, nextScheduledUpdate, version)
+                }
                 text="Generate"
               />
             </InputWrapper>
@@ -153,8 +153,10 @@ export const PortalUpdates = () => {
             <Clickableimg
               imageSrc={clipBoardIcon}
               alt="clipboard"
-              active={code.trim() !== ""}
-              onClick={() => { copyToClipboard(code); }}
+              active={code.trim() !== ''}
+              onClick={() => {
+                copyToClipboard(code);
+              }}
               tooltip="Copy to clipboard"
             />
           </ImgWrapper>

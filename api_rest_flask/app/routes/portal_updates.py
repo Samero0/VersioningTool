@@ -41,26 +41,37 @@ def get_latest_portal_update():
 
 @bp.route("/", methods=["PUT"])
 def update_latest_portal_update():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        print("[PUT /portal-updates/] Payload recibido:", data)
 
-    # Buscar el último registro por fecha de actualización
-    latest_entry = PortalUpdate.query.order_by(PortalUpdate.updated_at.desc()).first()
-    if not latest_entry:
-        return jsonify({"error": "No portal update found"}), 404
+        latest_entry = PortalUpdate.query.order_by(PortalUpdate.updated_at.desc()).first()
+        if not latest_entry:
+            print("❌ No se encontró ningún portal update.")
+            return jsonify({"error": "No portal update found"}), 404
 
-    # Actualizar solo los campos presentes en el payload
-    if "version" in data:
-        latest_entry.version = data["version"]
-    if "enabled" in data:
-        latest_entry.enabled = data["enabled"]
-    if "next_scheduled_update" in data:
-        date_str = data["next_scheduled_update"]
-        latest_entry.next_scheduled_update = datetime.strptime(date_str[:10], "%Y-%m-%d")
+        if "version" in data:
+            latest_entry.version = data["version"]
+        if "enabled" in data:
+            latest_entry.enabled = data["enabled"]
+        if "next_scheduled_update" in data:
+            try:
+                date_str = data["next_scheduled_update"]
+                print("↪️ Parseando fecha:", date_str)
+                latest_entry.next_scheduled_update = datetime.strptime(date_str[:10], "%Y-%m-%d")
+            except Exception as date_err:
+                print("❌ Error al parsear fecha:", date_str, "→", date_err)
+                return jsonify({"error": "Invalid date format"}), 400
 
-    # Actualizar campo de timestamp
-    latest_entry.updated_at = datetime.utcnow()
+        latest_entry.updated_at = datetime.utcnow()
 
-    db.session.commit()
-    return jsonify({"message": "Portal update updated"}), 200
+        db.session.commit()
+        print("✅ Portal update actualizado correctamente.")
+        return jsonify({"message": "Portal update updated"}), 200
+    except Exception as e:
+        import traceback
+        print("🔥 Excepción en PUT /portal-updates/:")
+        print(traceback.format_exc())
+        return jsonify({"error": "Internal Server Error"}), 500
 
 
