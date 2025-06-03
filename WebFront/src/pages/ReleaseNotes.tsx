@@ -88,6 +88,11 @@ export const ReleaseNotes = () => {
     syncFromBackend(); // carga inicial desde el backend
   }, [syncFromBackend]);
 
+  useEffect(() => {
+    const storedCode = localStorage.getItem("PortalUpdatesCode");
+    if (storedCode) setCodeValue(storedCode);
+  }, []);
+
   return (
     <AppContainer>
       <Display>
@@ -195,7 +200,13 @@ export const ReleaseNotes = () => {
                             localStorage.setItem('ReleaseNotesVersion', version);
                             localStorage.setItem('ReleaseNotesDate', formatDate(dataDate)!);
 
-                            syncToBackend();
+                            try {
+                              syncToBackend();
+                              alert("✅ Data sent successfully!");
+                              closePopup(); 
+                            } catch (error) {
+                              alert("❌ Failed to send data. Please try again." + error);
+                            }
                           }}
                           text="Send"
                         />

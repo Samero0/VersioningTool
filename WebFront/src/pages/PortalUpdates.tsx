@@ -87,6 +87,11 @@ export const PortalUpdates = () => {
     syncFromBackend();
   }, [syncFromBackend]);
 
+  useEffect(() => {
+    const storedCode = localStorage.getItem("PortalUpdatesCode");
+    if (storedCode) setCodeValue(storedCode);
+  }, []);
+
   return (
     <AppContainer>
       <Display>
